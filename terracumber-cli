@@ -233,8 +233,8 @@ def get_git_credentials(args, tf_vars):
 
 
 def run_terraform(args, tf_vars):
-    print("Args are: " + vars(args))
-    print("Terraform bin is: " + args.terraform_bin)
+    for k, v in vars(args):
+        print(f"{k}:{v}\n")
     """ Prepare the environment """
     terraform = terracumber.terraformer.Terraformer(args.gitfolder, args.tf,
                                                     args.sumaform_backend, tf_vars,
