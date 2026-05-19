@@ -36,17 +36,23 @@ function is_number() {
 }
 
 function remove_results() {
-  local RESULTS_PATH="${1}/*"
+  local RESULTS_PATH="${1}/[0-9]*"
   local SAVE=${2}
   local DRY_RUN=${3} 
-  TOTAL=$(ls -tld ${RESULTS_PATH} | wc -l)
+
+  # prevent error if there are no numbered directories
+  local ALL_RESULTS=($(ls -td ${RESULTS_PATH} 2>/dev/null))
+  local TOTAL=${#ALL_RESULTS[@]}
+
   if [ ${TOTAL} -gt ${SAVE} ]; then
     if [ "${DRY_RUN}" == "true" ]; then
       echo "DRY RUN: There are more than ${SAVE} result folders, would remove all except the ${SAVE} newest..."
     else
       echo "There are more than ${SAVE} result folders, removing all except the ${SAVE} newest..."
     fi
-    for RESULT in $(ls -td ${RESULTS_PATH} | tail -n +$((${SAVE}+1))); do
+    local TO_DELETE=("${ALL_RESULTS[@]:${SAVE}}")
+
+    for RESULT in "${TO_DELETE[@]}"; do
       if [ "${DRY_RUN}" == "true" ]; then
         echo "DRY RUN: Would remove ${RESULT}"
       else
