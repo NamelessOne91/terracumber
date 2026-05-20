@@ -36,7 +36,9 @@ function is_number() {
 }
 
 function remove_results() {
-  local RESULTS_PATH="${1}/[0-9]*"
+  shopt -s extglob
+  
+  local RESULTS_PATH="${1}/+([0-9])"
   local SAVE=${2}
   local DRY_RUN=${3} 
 
