@@ -150,18 +150,19 @@ def parse_args():
     return args
 
 
-def read_config(tf_file, tf_variables_description_file, tf_variables_product_file):
+def read_config(tf_file, tf_variables_description_file, tf_variables_product_file, skip_validation=False):
     """Read and validate the config from a tf file"""
     if tf_variables_description_file != '':
         config = terracumber.config.read_config(tf_variables_description_file)
     else:
         config = terracumber.config.read_config(tf_file)
-    for required in ['URL_PREFIX', 'CUCUMBER_COMMAND', 'CUCUMBER_BRANCH', 'CUCUMBER_RESULTS',
-                     'MAIL_SUBJECT', 'MAIL_TEMPLATE', 'MAIL_SUBJECT_ENV_FAIL',
-                     'MAIL_TEMPLATE_ENV_FAIL', 'MAIL_FROM', 'MAIL_TO']:
-        if required not in config:
-            logger.error("Variable %s does not exist in %s and is mandatory!", required, tf_file)
-            return False
+    if not skip_validation:
+        for required in ['URL_PREFIX', 'CUCUMBER_COMMAND', 'CUCUMBER_BRANCH', 'CUCUMBER_RESULTS',
+                         'MAIL_SUBJECT', 'MAIL_TEMPLATE', 'MAIL_SUBJECT_ENV_FAIL',
+                         'MAIL_TEMPLATE_ENV_FAIL', 'MAIL_FROM', 'MAIL_TO']:
+            if required not in config:
+                logger.error("Variable %s does not exist in %s and is mandatory!", required, tf_file)
+                return False
     if tf_variables_product_file != '':
         with open(tf_variables_product_file, 'r') as f:
             for line in f:
@@ -441,9 +442,9 @@ def main():
     # gitsync, provision, cucumber and saltshaker steps don't consume config values
     # (cucumber/saltshaker require --cucumber-cmd/--saltshaker-cmd which replace config usage)
     steps_without_config = {'gitsync', 'provision', 'cucumber', 'saltshaker'}
-    if not args.skip_variables_check and (
-            args.runall or args.runstep not in steps_without_config):
-        config = read_config(args.tf, args.tf_variables_description_file, args.tf_variables_product_file)
+    if args.runall or args.runstep not in steps_without_config:
+        config = read_config(args.tf, args.tf_variables_description_file, args.tf_variables_product_file,
+                             skip_validation=args.skip_variables_check)
         if not config:
             sys.exit(1)
         config = terracumber.utils.overwrite_dict(config, tf_vars)
