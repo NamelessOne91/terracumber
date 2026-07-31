@@ -117,7 +117,7 @@ class Git:
         """ Remove all tags from a local repository """
         removed = False
         for reference in self.repo.listall_references():
-            if re.match('refs\/tags\/.+', reference):
+            if re.match(r'refs/tags/.+', reference):
                 self.repo.references.delete(reference)
                 removed = True
         return removed
