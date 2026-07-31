@@ -437,7 +437,12 @@ def main():
     if not os.path.isfile(args.tf):
         logger.error("ERROR: file %s from --tf argument does not exist or is not a file" % args.tf)
         sys.exit(1)
-    if not args.skip_variables_check:
+    config = {}
+    # gitsync, provision, cucumber and saltshaker steps don't consume config values
+    # (cucumber/saltshaker require --cucumber-cmd/--saltshaker-cmd which replace config usage)
+    steps_without_config = {'gitsync', 'provision', 'cucumber', 'saltshaker'}
+    if not args.skip_variables_check and (
+            args.runall or args.runstep not in steps_without_config):
         config = read_config(args.tf, args.tf_variables_description_file, args.tf_variables_product_file)
         if not config:
             sys.exit(1)
