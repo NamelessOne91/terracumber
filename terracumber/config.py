@@ -25,6 +25,9 @@ def read_config(path):
                     if value is None:
                         config[var_name] = 'null'
                     else:
+                        # Some python-hcl2 versions include surrounding quotes in string values
+                        if isinstance(value, str):
+                            value = value.strip('"')
                         config[var_name] = value
                 except (KeyError, TypeError):
                     # KeyError: no 'default' defined (e.g. SCC_USER)
