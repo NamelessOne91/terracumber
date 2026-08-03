@@ -30,7 +30,7 @@ class Git:
         self.reset_hard = False
         self.repo = None
         self.logger = logger
-        if 'user' in auth:
+        if auth.get('user') is not None:
             self.credentials = pygit2.credentials.UserPass(auth['user'],
                                                            auth['password'])
         elif 'private' in auth:
@@ -117,7 +117,7 @@ class Git:
         """ Remove all tags from a local repository """
         removed = False
         for reference in self.repo.listall_references():
-            if re.match('refs\/tags\/.+', reference):
+            if re.match(r'refs/tags/.+', reference):
                 self.repo.references.delete(reference)
                 removed = True
         return removed

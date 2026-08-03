@@ -10,14 +10,22 @@ def read_config(path):
             return config
         for var_block in hcl_data['variable']:
             for var_name, var_attributes in var_block.items():
+                # python-hcl2 <4.0 wraps each variable's attributes in a list
+                if isinstance(var_attributes, list):
+                    if not var_attributes:
+                        continue
+                    var_attributes = var_attributes[0]
                 try:
-                    # Directly access the 'default' key in the attributes dictionary
                     value = var_attributes['default']
+                    # python-hcl2 <4.0 also wraps scalar values in lists
+                    if isinstance(value, list):
+                        value = value[0] if value else None
                     if value is None:
                         config[var_name] = 'null'
                     else:
                         config[var_name] = value
-                except KeyError:
-                    # Pass if 'default' is not defined (e.g., for SCC_USER)
+                except (KeyError, TypeError):
+                    # KeyError: no 'default' defined (e.g. SCC_USER)
+                    # TypeError: unexpected format from an older python-hcl2
                     pass
     return config
