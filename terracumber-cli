@@ -382,7 +382,8 @@ def send_mail(args, config, template_data=None, cucumber=None, saltshaker=None):
     try:
         mail.send_email()
         return True
-    except:
+    except Exception as e:
+        logger.exception("ERROR: could not send the email: %s: %s", type(e).__name__, e)
         return False
 
 
